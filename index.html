@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İmparatorluk E-Devlet Sistemi</title>
+    <style>
+        :root {
+            --primary-dark: #1a1c23;
+            --emperor-gold: #b7791f;
+            --citizen-blue: #2b6cb0;
+            --bg-gray: #f7fafc;
+            --text-dark: #2d3748;
+            --danger-red: #c53030;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--emperor-gold);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            width: 90%;
+            flex: 1;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .screen { display: none; }
+        .active { display: block; }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-block { width: 100%; }
+        .btn-gold { background-color: var(--emperor-gold); color: white; }
+        .btn-gold:hover { background-color: #976615; }
+        .btn-blue { background-color: var(--citizen-blue); color: white; }
+        .btn-blue:hover { background-color: #2c5282; }
+        .btn-danger { background-color: var(--danger-red); color: white; }
+        .btn-danger:hover { background-color: #9b2c2c; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .data-badge {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-top: 3px solid var(--emperor-gold);
+        }
+
+        .list-box {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            background: #f8fafc;
+            margin-bottom: 15px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-content: center;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .message-card {
+            background: #fffaf0;
+            border-left: 4px solid var(--emperor-gold);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .message-card.citizen-style {
+            background: #ebf8ff;
+            border-left: 4px solid var(--citizen-blue);
+        }
+
+        .message-meta {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .logout-section {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="header-title"> ÇEMİŞİSTAN İMPARATORLUĞU E-DEVLET KAPISI</h1>
+    </header>
+
+    <div class="container">
+
+        <!-- GİRİŞ EKRANI -->
+        <div id="login-screen" class="card screen active">
+            <h2>Sisteme Giriş</h2>
+            <p>Lütfen size tahsis edilen 7 haneli vatandaşlık kodunu giriniz.</p>
+            <input type="password" id="login-code" maxlength="7" placeholder="XXXXXXX" style="text-align: center; font-size: 24px; letter-spacing: 5px;">
+            <button class="btn-blue btn-block" onclick="handleLogin()">Devlet Kapısına Gir</button>
+        </div>
+
+        <!-- ÇIKIŞ BÖLÜMÜ -->
+        <div id="global-nav" class="logout-section screen">
+            <span style="font-weight: bold; margin-right: 15px;">Aktif Kullanıcı: <span id="current-user-display"></span></span>
+            <button class="btn-danger" onclick="logout()">Güvenli Çıkış</button>
+        </div>
+
+        <!-- İMPARATOR YÖNETİM MENÜSÜ -->
+        <div id="emperor-screen" class="screen">
+            <div class="card" style="border-left: 6px solid var(--emperor-gold);">
+                <h2>👑 İmparatorluk Yönetim Konseyi</h2>
+                <div class="grid-2" style="margin-bottom: 25px;">
+                    <div class="data-badge">
+                        <span>💰 İmparatorluk Hazinesi</span>
+                        <div id="emp-treasury-view" style="font-size: 24px; color: green; margin-top: 5px;">0 Altın</div>
+                    </div>
+                    <div class="data-badge">
+                        <span>📊 Güncel Vergi Oranı</span>
+                        <div id="emp-tax-view" style="font-size: 24px; color: #dd6b20; margin-top: 5px;">%0</div>
+                    </div>
+                </div>
+
+                <h3>⚙️ Ekonomik Düzenlemeler</h3>
+                <div class="grid-2">
+                    <div>
+                        <label>Yeni Vergi Oranı (%)</label>
+                        <input type="number" id="new-tax-rate" min="0" max="100" placeholder="Örn: 15">
+                        <button class="btn-gold" onclick="updateTaxRate()">Vergiyi Güncelle</button>
+                    </div>
+                    <div>
+                        <label>Hazineyi Güncelle (Altın)</label>
+                        <input type="number" id="new-treasury-amount" placeholder="Örn: 500000">
+                        <button class="btn-gold" onclick="updateTreasury()">Hazineyi Ayarla</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>👥 Nüfus ve Vatandaşlık İdaresi</h3>
+                <div class="grid-2">
+                    <div>
+                        <h4>Yeni Vatandaş Ekle</h4>
+                        <label>Adı Soyadı</label>
+                        <input type="text" id="new-cit-name" placeholder="Vatandaşın Adı">
+                        <label>7 Haneli Giriş Kodu</label>
+                        <input type="text" id="new-cit-code" maxlength="7" placeholder="Örn: 1234567">
+                        <button class="btn-blue" onclick="addCitizen()">Nüfusa Kaydet</button>
+                    </div>
+                    <div>
+                        <h4>Mevcut Vatandaş Listesi</h4>
+                        <div id="citizen-list" class="list-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📜 Ferman ve Dilekçe İdaresi</h3>
+                <div class="grid-2">
+                    <div>
+                        <h4>Yeni Ferman Yayınla</h4>
+                        <textarea id="new-decree-text" rows="4" placeholder="Tüm tebaaya duyurulacak emriniz..."></textarea>
+                        <button class="btn-gold btn-block" onclick="publishDecree()">Fermanı İlan Et</button>
+                    </div>
+                    <div>
+                        <h4>Halktan Gelen Dilekçeler</h4>
+                        <div id="emperor-petitions-box" class="list-box" style="max-height: 250px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VATANDAŞ MENÜSÜ -->
+        <div id="citizen-screen" class="screen">
+            <div class="card" style="border-left: 6px solid var(--citizen-blue);">
+                <h2>Vatandaş Portalı</h2>
+                <div class="grid-2">
+                    <div class="data-badge" style="border-top-color: var(--citizen-blue)">
+                        <span>Mevcut Vergi Yükümlülüğünüz</span>
+                        <div id="cit-tax-view" style="font-size: 24px; color: #dd6b20;">%0</div>
+                    </div>
+                    <div class="data-badge" style="border-top-color: var(--citizen-blue)">
+                        <span>Hazine Durumu</span>
+                        <div id="cit-treasury-view" style="font-size: 20px;">Güvende</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>📜 İmparatorluk Fermanları</h3>
+                    <div id="citizen-decrees-box" class="list-box" style="max-height: 300px;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>✍️ Saraya Dilekçe Yaz</h3>
+                    <textarea id="new-petition-text" rows="5" placeholder="Dilekçenizi buraya yazın..."></textarea>
+                    <button class="btn-blue btn-block" onclick="sendPetition()">Dilekçeyi Saraya Gönder</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let serverData = null;
+        let aktifKullaniciKodu = null;
+
+        // SUNUCUDAN VERİ ÇEKME
+        async function fetchServerData() {
+            try {
+                const res = await fetch('/api/data');
+                serverData = await res.json();
+                if (aktifKullaniciKodu) {
+                    if (serverData.vatandaslar[aktifKullaniciKodu]?.rol === 'İmparator') {
+                        yenileImparatorPaneli();
+                    } else {
+                        yenileVatandasPaneli();
+                    }
+                }
+            } catch (err) {
+                console.error("Sunucuya bağlanılamadı:", err);
+            }
+        }
+
+        // GİRİŞ KONTROLÜ
+        async function handleLogin() {
+            const kod = document.getElementById("login-code").value.trim();
+            await fetchServerData();
+
+            if (serverData && serverData.vatandaslar[kod]) {
+                aktifKullaniciKodu = kod;
+                document.getElementById("login-screen").classList.remove("active");
+                document.getElementById("global-nav").classList.add("active");
+                document.getElementById("current-user-display").innerText = serverData.vatandaslar[kod].isim;
+
+                if (serverData.vatandaslar[kod].rol === "İmparator") {
+                    document.getElementById("emperor-screen").classList.add("active");
+                    document.getElementById("header-title").innerText = "👑 İMPARATORLUK YÖNETİM PANELİ";
+                    yenileImparatorPaneli();
+                } else {
+                    document.getElementById("citizen-screen").classList.add("active");
+                    document.getElementById("header-title").innerText = "BÜYÜK İMPARATORLUK VATANDAŞ PORTALI";
+                    yenileVatandasPaneli();
+                }
+            } else {
+                alert("Geçersiz giriş kodu!");
+            }
+        }
+
+        function logout() {
+            aktifKullaniciKodu = null;
+            document.getElementById("login-code").value = "";
+            document.getElementById("emperor-screen").classList.remove("active");
+            document.getElementById("citizen-screen").classList.remove("active");
+            document.getElementById("global-nav").classList.remove("active");
+            document.getElementById("login-screen").classList.add("active");
+        }
+
+        function yenileImparatorPaneli() {
+            document.getElementById("emp-treasury-view").innerText = Number(serverData.hazineMiktari).toLocaleString() + " Altın";
+            document.getElementById("emp-tax-view").innerText = "%" + serverData.vergiOrani;
+
+            const listelenecekYer = document.getElementById("citizen-list");
+            listelenecekYer.innerHTML = "";
+            for (let kod in serverData.vatandaslar) {
+                const v = serverData.vatandaslar[kod];
+                listelenecekYer.innerHTML += `
+                    <div class="item-row">
+                        <span><strong>${v.isim}</strong> (${kod})</span>
+                        ${v.rol !== 'İmparator' ? `<button class="btn-danger" style="padding:2px 8px; font-size:12px;" onclick="removeCitizen('${kod}')">Sil</button>` : ''}
+                    </div>
+                `;
+            }
+
+            const dilekceKutusu = document.getElementById("emperor-petitions-box");
+            dilekceKutusu.innerHTML = serverData.dilekceler.length === 0 ? "<p style='color:gray; padding:10px;'>Dilekçe yok.</p>" : "";
+            serverData.dilekceler.slice().reverse().forEach(d => {
+                dilekceKutusu.innerHTML += `
+                    <div class="message-card citizen-style">
+                        <div class="message-meta">Gönderen: ${d.gonderen} (${d.kod})</div>
+                        <div>${d.metin}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function yenileVatandasPaneli() {
+            document.getElementById("cit-tax-view").innerText = "%" + serverData.vergiOrani;
+            document.getElementById("cit-treasury-view").innerText = Number(serverData.hazineMiktari) > 50000 ? "Zengin / Güvende" : "Kritik Seviye";
+
+            const fermanKutusu = document.getElementById("citizen-decrees-box");
+            fermanKutusu.innerHTML = serverData.fermanlar.length === 0 ? "<p style='color:gray; padding:10px;'>Ferman yok.</p>" : "";
+            serverData.fermanlar.slice().reverse().forEach(f => {
+                fermanKutusu.innerHTML += `
+                    <div class="message-card">
+                        <div class="message-meta">👑 MÜHÜRLÜ İMPARATORLUK FERMANI</div>
+                        <div><strong>${f}</strong></div>
+                    </div>
+                `;
+            });
+        }
+
+        // İSTEK GÖNDERME YARDIMCISI
+        async function sendAPI(url, payload) {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            return await res.json();
+        }
+
+        async function updateTaxRate() {
+            const yeniOran = document.getElementById("new-tax-rate").value.trim();
+            if(!yeniOran) return;
+            await sendAPI('/api/tax', { vergiOrani: yeniOran });
+            await fetchServerData();
+            document.getElementById("new-tax-rate").value = "";
+        }
+
+        async function updateTreasury() {
+            const yeniHazine = document.getElementById("new-treasury-amount").value.trim();
+            if(!yeniHazine) return;
+            await sendAPI('/api/treasury', { hazineMiktari: yeniHazine });
+            await fetchServerData();
+            document.getElementById("new-treasury-amount").value = "";
+        }
+
+        async function addCitizen() {
+            const isim = document.getElementById("new-cit-name").value.trim();
+            const kod = document.getElementById("new-cit-code").value.trim();
+            if(!isim || kod.length !== 7) return alert("Geçerli isim ve 7 haneli kod girin!");
+
+            const res = await sendAPI('/api/citizen/add', { kod, isim });
+            if(res.error) return alert(res.error);
+            await fetchServerData();
+            document.getElementById("new-cit-name").value = "";
+            document.getElementById("new-cit-code").value = "";
+        }
+
+        async function removeCitizen(kod) {
+            if(confirm("Silmek istediğinize emin misiniz?")) {
+                await sendAPI('/api/citizen/remove', { kod });
+                await fetchServerData();
+            }
+        }
+
+        async function publishDecree() {
+            const metin = document.getElementById("new-decree-text").value.trim();
+            if(!metin) return;
+            await sendAPI('/api/decree', { metin });
+            await fetchServerData();
+            document.getElementById("new-decree-text").value = "";
+        }
+
+        async function sendPetition() {
+            const metin = document.getElementById("new-petition-text").value.trim();
+            if(!metin) return;
+            await sendAPI('/api/petition', {
+                kod: aktifKullaniciKodu,
+                gonderen: serverData.vatandaslar[aktifKullaniciKodu].isim,
+                metin
+            });
+            await fetchServerData();
+            alert("Dilekçeniz saraya iletildi!");
+            document.getElementById("new-petition-text").value = "";
+        }
+
+        // Otomatik Veri Güncelleme (Her 5 saniyede bir canlı günceller)
+        setInterval(() => {
+            if (aktifKullaniciKodu) fetchServerData();
+        }, 5000);
+    </script>
+</body>
+</html>
